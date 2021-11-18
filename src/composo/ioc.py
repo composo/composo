@@ -14,7 +14,27 @@ class Plugins(containers.DeclarativeContainer):
     shell = providers.Factory(Shell)
 
 
+DEFAULT_CONFIG = {
+    "author": {
+        "name": "A. Rand Developer",
+        "email": "a.rand@email.com"
+    },
+    "vcs": {
+        "git": {
+            "github": {
+                "name": "ARand"
+            }
+        }
+    },
+    "license": "mit"
+}
+
+
 class App(containers.DeclarativeContainer):
 
+    config = providers.Configuration("config")
+    config.override(DEFAULT_CONFIG)
+
     app = providers.Factory(Composo,
-                            plugins=Plugins.discovered_plugins)
+                            plugins=Plugins.discovered_plugins,
+                            config=config)

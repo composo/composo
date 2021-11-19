@@ -39,4 +39,4 @@ class Composo:
         config = {**self.__config, **existing_config, **kwargs}
         lang = config["lang"]
         plugin = self._load_plugin(lang, config)
-        plugin.init(path)
+        plugin.init(target_path)

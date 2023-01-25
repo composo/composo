@@ -9,5 +9,8 @@ include LICENSE.txt
 # Include setup.py
 include setup.py
 
+# Include requirements.txt
+include requirements.txt
+
 # Include the data files
 recursive-include data *

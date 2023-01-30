@@ -44,7 +44,7 @@ class Composo:
             module=__name__,
         )
 
-        @self._app.callback(invoke_without_command=True)
+        @self._app.callback(invoke_without_command=False)
         def get_version(
                 version: bool = typer.Option(
                     False,

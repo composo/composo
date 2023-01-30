@@ -44,8 +44,9 @@ class Composo:
             module=__name__,
         )
 
-        @self._app.callback(invoke_without_command=False)
+        @self._app.callback(invoke_without_command=True)
         def get_version(
+                ctx: typer.Context,
                 version: bool = typer.Option(
                     False,
                     "--version",
@@ -59,6 +60,9 @@ class Composo:
             if version:
                 typer.echo(f"composo {get_module_version('composo')}")
                 raise typer.Exit()
+            elif ctx.invoked_subcommand is None:
+                rich_utils.rich_format_error(UsageError(f"Missing command", ctx=ctx))
+                raise typer.Exit(1)
 
         epilog = """
 Create a new project named "my-project" with the plugin "python" without initializing it  
@@ -126,8 +130,10 @@ Create a new project named "my-project" with the plugin "python" and initialize 
             """
             if plugin is None:
                 rich_utils.rich_format_error(UsageError(f"No installed plugins could be found, please install a composo plugin", ctx=ctx))
+                raise typer.Exit(1)
             else:
                 self.new(name=name, plugin=plugin.value, init=init, dry_run=dry_run)
+                raise typer.Exit()
 
         epilog_init = """
 
@@ -183,10 +189,14 @@ An example [dim].composo.yaml[/dim] file would be:
             """
             Initialize the project in the given path or the current working directory
             """
+            code = 0
             try:
                 self.init(path, dry_run=dry_run)
             except FileNotFoundError as e:
+                code = 1
                 rich_utils.rich_format_error(UsageError(f"Invalid value for '[PATH]': Directory '{path}' must contain '.composo.yaml'", ctx=ctx))
+            finally:
+                typer.Exit(code)
 
     def __call__(self, *args, **kwargs):
         self.load_commands()

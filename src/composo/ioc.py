@@ -9,7 +9,7 @@ from composo.shell.plugin import Shell
 
 
 class Plugins(containers.DeclarativeContainer):
-    discovered_plugins = providers.Callable(lambda name: {ep.name: ep for ep in entry_points()[name]},
+    discovered_plugins = providers.Callable(lambda name: {ep.name: ep for ep in entry_points().get(name, [])},
                                             'composo.plugins')
 
     shell = providers.Factory(Shell)

@@ -1,8 +1,14 @@
 import traceback
+from enum import Enum
 from pathlib import Path
 import os
-
+from typing import Optional
+from importlib.metadata import version as get_module_version
 import yaml
+import typer
+
+
+# typer.rich_utils.STYLE_HELPTEXT = ""
 
 
 class Composo:
@@ -14,9 +20,109 @@ class Composo:
         $ composo new my-project --plugin=python
     """
 
-    def __init__(self, plugins, config):
+    def __init__(self, plugins, config, app: typer.Typer):
         self.__plugins = plugins
         self.__config = config
+        self._app = app
+
+    def load_commands(self):
+        PluginsEnum = Enum(
+            "PluginsEnum",
+            names=[(name, name) for name in self.__plugins.keys()],
+            module=__name__,
+        )
+
+        @self._app.callback(invoke_without_command=True)
+        def get_version(
+                version: bool = typer.Option(
+                    False,
+                    "--version",
+                    "-v",
+                    help="Print version and exit.",
+                ),
+        ) -> None:
+            """
+            Composo cmdline tool for bootstrapping projects.
+            """
+            if version:
+                typer.echo(f"composo {get_module_version('composo')}")
+                raise typer.Exit()
+
+        epilog = """
+[bold]Examples[/bold]
+
+
+
+ 
+Create a new project named "my-project" with the plugin "python" without initializing it  
+
+$ composo new my-project --plugin=python  
+
+
+
+Create a new project named "my-project" with the plugin "python" and initialize it  
+
+$ composo new my-project --plugin=python --init  
+"""
+
+        # class TyperCommand(TyperCommandBase):
+        #     def get_usage(self, ctx: click.Context) -> str:
+        #         """Override get_usage."""
+        #         usage = super().get_usage(ctx)
+        #         message = (
+        #                 'Message Above.\n'
+        #                 + usage
+        #                 + '\nMessage Below.'
+        #         )
+        #         return message
+
+
+        # class TyperGroup(TyperGroupBase):
+        #     """Custom TyperGroup class."""
+
+        #     def get_usage(self, ctx: click.Context) -> str:
+        #         """Override get_usage."""
+        #         usage = super().get_usage(ctx)
+        #         message = (
+        #                 'Message Above.\n'
+        #                 + usage
+        #                 + '\nMessage Below.'
+        #         )
+        #         return message
+
+        @self._app.command(
+            # context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+            epilog=epilog,
+            # cls=TyperCommand
+        )
+        def new(ctx: typer.Context, name: str = typer.Argument(..., help="the name of the project to be created"),
+                plugin: Optional[PluginsEnum] = typer.Option("python", help="the name of the plugin to be used"),
+                init: Optional[bool] = typer.Option(False, help="whether the project is initialized directly"),
+                dry_run: Optional[bool] = typer.Option(False, help="use dry run or not")):
+            """
+            Create a new project directory by the name of the chosen project name.
+
+            The plugin will place a `.composo.yaml` file into the target directory for further configuration.
+            """
+
+            self.new(name=name, plugin=plugin.value, init=init, dry_run=dry_run)
+
+        @self._app.command()
+        def init(path: str = typer.Argument(".", help="the location of the project to be initialized"),
+                 dry_run: Optional[bool] = typer.Option(False, help="use dry run or not")):
+            """
+            Initialize the project in the given path or the current working directory
+            """
+
+            return self.init(path, dry_run=dry_run)
+
+    def __call__(self, *args, **kwargs):
+        self.load_commands()
+        self._app()
+
+    def run(self):
+        self.load_commands()
+        self._app()
 
     def _load_plugin(self, plugin, config):
         try:

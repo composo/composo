@@ -3,3 +3,5 @@ appdirs~=1.4.4
 setuptools~=57.0.0
 dependency-injector
 PyYaml
+typer[all]
+rich

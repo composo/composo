@@ -1,18 +1,15 @@
-import inspect
 import traceback
 from enum import Enum
 from pathlib import Path
-import os
+
 from typing import Optional
 from importlib.metadata import version as get_module_version
 
 import click
-import rich
+import typing
 import yaml
 import typer
-from click import Context, HelpFormatter, UsageError
-from rich.align import Align
-from rich.padding import Padding
+from click import UsageError
 from rich.panel import Panel
 from typer import rich_utils
 
@@ -32,10 +29,12 @@ class Composo:
         $ composo new my-project --plugin=python
     """
 
-    def __init__(self, plugins, config, app: typer.Typer):
+    def __init__(self, plugins, config, app: typer.Typer, fopen: typing.Callable, getcwd: typing.Callable):
         self.__plugins = plugins
         self.__config = config
         self._app = app
+        self._open = fopen
+        self._getcwd = getcwd
 
     def load_commands(self):
         PluginsEnum = Enum(
@@ -61,15 +60,15 @@ class Composo:
                 typer.echo(f"composo {get_module_version('composo')}")
                 raise typer.Exit()
             elif ctx.invoked_subcommand is None:
-                rich_utils.rich_format_error(UsageError(f"Missing command", ctx=ctx))
+                rich_utils.rich_format_error(UsageError("Missing command", ctx=ctx))
                 raise typer.Exit(1)
 
         epilog = """
-Create a new project named "my-project" with the plugin "python" without initializing it  
+Create a new project named "my-project" with the plugin "python" without initializing it
 
     [dim]$ composo new my-project --plugin=python[/dim]
 
-Create a new project named "my-project" with the plugin "python" and initialize it  
+Create a new project named "my-project" with the plugin "python" and initialize it
 
     [dim]$ composo new my-project --plugin=python --init[/dim]
 """
@@ -86,28 +85,17 @@ Create a new project named "my-project" with the plugin "python" and initialize 
                     ctx=ctx,
                     markup_mode=self.rich_markup_mode,
                 )
-                console = _get_rich_console()
-                epilogue_text = _make_rich_rext(text=epilog, markup_mode="rich")
-                # console.print(Padding(Align(epilogue_text, pad=False), 1))
+                if epilog is not None:
+                    console = _get_rich_console()
+                    epilogue_text = _make_rich_rext(text=epilog, markup_mode="rich")
+                    # console.print(Padding(Align(epilogue_text, pad=False), 1))
 
-                console.print(Panel(
-                    epilogue_text,
-                    border_style="dim",
-                    title="Examples",
-                    title_align="left",
-                ))
-
-            def format_epilog(self, ctx: Context, formatter: HelpFormatter) -> None:
-                """Writes the epilog into the formatter if it exists."""
-                if self.epilog:
-                    epilog = inspect.cleandoc(self.epilog)
-                    formatter.write_paragraph()
-
-                    with formatter.section("Examples"):
-                        formatter.write_dl(epilog)
-
-                    # with formatter.indentation():
-                    #     formatter.write_text(epilog)
+                    console.print(Panel(
+                        epilogue_text,
+                        border_style="dim",
+                        title="Examples",
+                        title_align="left",
+                    ))
 
         def get_plugin():
             sorted_plugins = sorted(list(self.__plugins.keys()))
@@ -125,11 +113,12 @@ Create a new project named "my-project" with the plugin "python" and initialize 
             """
             Create a new project named NAME
 
-            The plugin will create a directory named NAME and place a [dim italic].composo.yaml[/dim italic] file into the
-            target directory for further configuration.
+            The plugin will create a directory named NAME and place a [dim italic].composo.yaml[/dim italic] file
+            into the target directory for further configuration.
             """
             if plugin is None:
-                rich_utils.rich_format_error(UsageError(f"No installed plugins could be found, please install a composo plugin", ctx=ctx))
+                rich_utils.rich_format_error(
+                    UsageError("No installed plugins could be found, please install a composo plugin", ctx=ctx))
                 raise typer.Exit(1)
             else:
                 self.new(name=name, plugin=plugin.value, init=init, dry_run=dry_run)
@@ -193,9 +182,10 @@ An example [dim].composo.yaml[/dim] file would be:
             code = 0
             try:
                 self.init(path, dry_run=dry_run)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 code = 1
-                rich_utils.rich_format_error(UsageError(f"Invalid value for '[PATH]': Directory '{path}' must contain '.composo.yaml'", ctx=ctx))
+                rich_utils.rich_format_error(
+                    UsageError(f"Invalid value for '[PATH]': Directory '{path}' must contain '.composo.yaml'", ctx=ctx))
             finally:
                 typer.Exit(code)
 
@@ -212,9 +202,10 @@ An example [dim].composo.yaml[/dim] file would be:
             plugin = self.__plugins[plugin].load().init(config)
             return plugin
 
-        except KeyError as e:
+        except KeyError:
             print(traceback.format_exc())
-            print(f"no plugin found with name '{plugin}', available plugins are: {[k for k, _ in self.__plugins.items()]}")
+            print(f"no plugin found with name '{plugin}', "
+                  f"available plugins are: {[k for k, _ in self.__plugins.items()]}")
 
     def new(self, name: str, plugin: str = "python", init=False, **kwargs):
         """
@@ -286,10 +277,10 @@ An example [dim].composo.yaml[/dim] file would be:
                   name: ARand\n
 
         """
-        cwd = Path(os.getcwd())
+        cwd = Path(self._getcwd())
         target_path = cwd / Path(path)
 
-        with open(target_path / ".composo.yaml") as f:
+        with self._open(target_path / ".composo.yaml") as f:
             try:
                 existing_config = yaml.safe_load(f)
             except yaml.YAMLError as exc:

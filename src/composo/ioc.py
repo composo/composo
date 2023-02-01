@@ -1,3 +1,4 @@
+import os
 from importlib.metadata import entry_points
 
 import dependency_injector.providers as providers
@@ -42,4 +43,6 @@ class App(containers.DeclarativeContainer):
     app = providers.Factory(Composo,
                             plugins=Plugins.discovered_plugins,
                             config=config,
+                            fopen=open,
+                            getcwd=os.getcwd,
                             app=typer_app)

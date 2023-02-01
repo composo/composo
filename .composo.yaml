@@ -1,0 +1,29 @@
+app:
+  flavour:
+    standalone: true
+    tool: true
+  name:
+    class: Composo 
+    package: composo
+    project: composo
+author:
+  email: jan@hermes-technology.de
+  name: Jan Hermes
+cache_dir: /home/hermes/.cache/composo
+ci:
+  gitlab:
+    autoversion: false
+    licensing: false
+    mypy: true
+    package: false
+    pages: true
+    pytest: true
+    cml: false 
+conf_dir: /home/hermes/.config/composo
+plugin: pydvc
+license: mit
+vcs:
+  git:
+    url: git@gitlab.cc-asp.fraunhofer.de:hermes/diabpipeline.git
+    github:
+      name: JanSurft

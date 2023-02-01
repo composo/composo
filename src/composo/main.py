@@ -1,8 +1,5 @@
 from pathlib import Path
 
-import fire
-import typer
-
 from typer.testing import CliRunner
 
 from composo import ioc
@@ -15,7 +12,6 @@ def main():
     ioc.App.config.from_yaml(Path(user_config_dir("composo")) / "config.yaml")
     app = ioc.App.app()
     app()
-    # fire.Fire(app)
 
 
 def run():

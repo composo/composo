@@ -1,5 +1,238 @@
+[tool.poetry]
+name = "composo"
+version = "0.4.0"
+description = "Composo component and project setup framework"
+license = "MIT"
+authors = ["Jan Hermes <jan@hermes-technology.de>"]
+maintainers = ["Jan Hermes <jan@hermes-technology.de>"]
+readme = "README.md"
+# The project homepage, e.g. Gitlab pages
+# homepage = ""
+repository = ""
+# The project documentation, e.g. Gitlab pages
+# documentation = ""
+keywords = ["development"]
+classifiers = [  # Optional
+        # How mature is this project? Common values are
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        'Development Status :: 4 - Beta',
+
+        # Indicate who your project is intended for
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Build Tools',
+
+        # Pick your license as you wish
+        'License :: OSI Approved :: MIT License',
+
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate you support Python 3. These classifiers are *not*
+        # checked by 'pip install'. See instead 'python_requires' below.
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        "Programming Language :: Python :: 3.10",
+        'Programming Language :: Python :: 3 :: Only',
+    ]
+packages = [
+    { include = "composo", from = "src" },
+    { include = "tests", format = "sdist" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+dependency-injector = "4.41.0"
+appdirs = "1.4.4"
+pyyaml = "6.0"
+typer = {extras = ["all"], version = "0.7.0"}
+
+[tool.poetry.group.test]
+optional = true
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+check-manifest = "*"
+coverage = "*"
+tox = "*"
+
+[tool.poetry.group.lint]
+optional = true
+[tool.poetry.group.lint.dependencies]
+mypy = "*"
+types-PyYAML = "*"
+types-protobuf = "*"
+types-pytz = "*"
+types-python-dateutil = "*"
+types-appdirs = "*"
+flake8 = "*"
+flake8-pyproject = "*"
+
+[tool.poetry.group.docs]
+optional = true
+[tool.poetry.group.docs.dependencies]
+Sphinx = "4.4.0"
+sphinx-rtd-theme = "1.0.0"
+nbsphinx = "0.8.8"
+sphinx-gallery = "0.10.1"
+
+[tool.poetry.scripts]
+composo = "composo.main:main"
+
+[tool.poetry.urls]
+"Bug Tracker" = "issue/url"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "-ra",
+    "-q",
+    # "--cov=src",
+    # "--cov-report=term-missing",
+    # "--cov-report=xml",
+]
+testpaths = [
+    "tests"
+]
+pythonpath = [
+    "src"
+]
+
+
+# MYPY
+# Global options:
+
+[tool.mypy]
+python_version = 3.8
+warn_return_any = true
+warn_unused_configs = true
+
+# Per-module options:
+
+[[tool.mypy.overrides]]
+module = "composo"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "composo.*"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "pipesai"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "pipesai.*"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "dependency_injector"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "fire"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "matplotlib"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "matplotlib.*"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "numpy"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "pandas"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "sklearn"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "sklearn.*"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "torch"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "tqdm"
+ignore_missing_imports = true
+warn_return_any = false
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = lint, type, py{36,37,38,39,310}
+
+# Define the minimal tox version required to run;
+# if the host tox is less than this the tool with create an environment and
+# provision it with a tox that satisfies it under provision_tox_env.
+# At least this version is needed for PEP 517/518 support.
+minversion = 3.3.0
+
+# Activate isolated build environment. tox will use a virtual environment
+# to build a source distribution from the source tree. For build tools and
+# arguments use the pyproject.toml file as specified in PEP-517 and PEP-518.
+isolated_build = true
+
+[testenv]
+passenv =
+    DBUS_SESSION_BUS_ADDRESS
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --with test
+commands =
+    poetry run pytest --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib
+
+[testenv:type]
+passenv =
+    DBUS_SESSION_BUS_ADDRESS
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --with lint
+commands =
+    poetry run mypy src
+
+
+[testenv:lint]
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --only lint
+commands =
+    poetry run flake8 src
+    poetry run flake8 tests
+"""
+
+[tool.flake8]
+exclude = [".tox", "*.egg", "build", "data"]
+select = ["E","W","F"]
+max-line-length = 120
+
 [build-system]
-# These are the assumed default build requirements from pip:
-# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
-requires = ["setuptools>=40.8.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

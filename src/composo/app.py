@@ -118,7 +118,7 @@ Create a new project named "my-project" with the plugin "python" and initialize 
             epilog=epilog,
             cls=TyperCommand
         )
-        def new(ctx: typer.Context, name: str = typer.Argument(..., help="the name of the project to be created"),
+        def new(ctx: typer.Context, name: str = typer.Argument(..., help="the NAME of the project to be created"),
                 plugin: Optional[PluginsEnum] = typer.Option(get_plugin(), help="the name of the plugin to be used"),
                 init: Optional[bool] = typer.Option(False, help="whether the project is initialized directly"),
                 dry_run: Optional[bool] = typer.Option(False, help="use dry run or not")):
@@ -138,9 +138,10 @@ Create a new project named "my-project" with the plugin "python" and initialize 
         epilog_init = """
 
 Create a project and initialize it afterwards externally:
-
-    [dim]$ composo new my-project --plugin=python
-    $ composo init --path=./my-project[/dim]
+[dim]
+    $ composo new my-project --plugin=python
+    $ composo init --path=./my-project
+[/dim]
 
 Create a project and initialize it in the project directory:
 [dim]
@@ -177,7 +178,7 @@ An example [dim].composo.yaml[/dim] file would be:
         @self._app.command(epilog=epilog_init, cls=TyperCommand)
         def init(ctx: typer.Context,
                  path: Path = typer.Argument(Path("."),
-                                             help="the location of the project to be initialized",
+                                             help="the PATH to the project root dir for initialization",
                                              exists=True,
                                              file_okay=False,
                                              dir_okay=True,
@@ -187,7 +188,7 @@ An example [dim].composo.yaml[/dim] file would be:
                                              ),
                  dry_run: Optional[bool] = typer.Option(False, help="use dry run or not")):
             """
-            Initialize the project in the given path or the current working directory
+            Initialize the project in the given PATH or the current working directory
             """
             code = 0
             try:

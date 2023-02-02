@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "composo"
-version = "0.4.0"
+version = "0.4.1"
 description = "Composo component and project setup framework"
 license = "MIT"
 authors = ["Jan Hermes <jan@hermes-technology.de>"]
@@ -78,6 +78,12 @@ sphinx-rtd-theme = "1.0.0"
 nbsphinx = "0.8.8"
 sphinx-gallery = "0.10.1"
 
+[tool.poetry.group.dev-plugins]
+optional = true
+[tool.poetry.group.dev-plugins.dependencies]
+requests = "2.26.0"
+composo-pydvc = { path = "../composo-python-dvc-plugin/", develop = true }
+
 [tool.poetry.scripts]
 composo = "composo.main:main"
 
@@ -122,62 +128,7 @@ ignore_missing_imports = true
 warn_return_any = false
 
 [[tool.mypy.overrides]]
-module = "pipesai"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "pipesai.*"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
 module = "dependency_injector"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "fire"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "matplotlib"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "matplotlib.*"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "numpy"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "pandas"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "sklearn"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "sklearn.*"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "torch"
-ignore_missing_imports = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "tqdm"
 ignore_missing_imports = true
 warn_return_any = false
 

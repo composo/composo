@@ -14,7 +14,7 @@ plugin: test
 
 EXAMPLE_CONTENT = """
 app:
-  flavour:
+  type:
     standalone: true
     tool: true
   name:

@@ -207,13 +207,14 @@ An example [dim].composo.yaml[/dim] file would be:
             print(f"no plugin found with name '{plugin}', "
                   f"available plugins are: {[k for k, _ in self.__plugins.items()]}")
 
-    def new(self, name: str, plugin: str = "python", init=False, **kwargs):
+    def new(self, name: str, plugin: str = "python", template: str = "default", init=False, **kwargs):
         """
         Create a new project directory by the name of the chosen project name. The plugin will place
         a `.composo.yaml` file into the target directory for further configuration.
 
         :param name: the name of the project to be created
         :param plugin: the name of the plugin to be used
+        :param template: the name of the project template to use
         :param init: whether the project is initiated directly
         :param kwargs: additional arguments that ares used by the activated plugin
 
@@ -227,7 +228,7 @@ An example [dim].composo.yaml[/dim] file would be:
 
             $ composo new my-project --plugin=python --init
         """
-        config = {**self.__config, **kwargs, "plugin": plugin}
+        config = {**self.__config, **kwargs, "plugin": plugin, "template": template}
         loaded_plugin = self._load_plugin(plugin, config)
         loaded_plugin.new(name=name)
         if init:

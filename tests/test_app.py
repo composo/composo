@@ -2,7 +2,6 @@ from pathlib import Path
 
 from composo.app import Composo
 
-
 EXAMPLE_CONTENT_SMALL = """
 app:
   name:
@@ -14,7 +13,7 @@ plugin: test
 
 EXAMPLE_CONTENT = """
 app:
-  flavour:
+  type:
     standalone: true
     tool: true
   name:
@@ -116,7 +115,6 @@ class MockPluginLoader:
         self.initializer = None
 
     def load(self):
-
         class Initializer:
             def __init__(self):
                 self.plugin = None
@@ -149,7 +147,8 @@ def test_composo_new_proper_argument_and_config_forwarding():
 
     plugin = loader.initializer.plugin
 
-    assert plugin.new_call_data == {"dry_run": True, "plugin": "test", "name": "test-proj", "is_test": True}
+    assert plugin.new_call_data == {"dry_run": True, "plugin": "test", "name": "test-proj", "is_test": True,
+                                    "template": "default"}
     assert plugin.init_call_data is None
 
 

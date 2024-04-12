@@ -8,7 +8,7 @@ maintainers = ["Jan Hermes <jan@hermes-technology.de>"]
 readme = "README.md"
 # The project homepage, e.g. Gitlab pages
 # homepage = ""
-repository = ""
+repository = "https://composo.example"
 # The project documentation, e.g. Gitlab pages
 # documentation = ""
 keywords = ["development"]
